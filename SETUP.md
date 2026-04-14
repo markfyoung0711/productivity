@@ -1,6 +1,6 @@
 # Developer Setup Guide
 
-This guide walks you through setting up the development environment for this project using [`uv`](https://docs.astral.sh/uv/) — the modern Python package and environment manager.
+This guide walks you through setting up the development environment for this project. The recommended approach is the **Docker devcontainer**, which provides a fully reproducible environment with all Snowflake and DB2 dependencies pre-installed.
 
 ---
 
@@ -8,22 +8,75 @@ This guide walks you through setting up the development environment for this pro
 
 | Tool | Purpose |
 |---|---|
-| Python 3.11+ | Runtime |
+| Python 3.12+ | Runtime |
 | `uv` | Dependency & environment management |
 | Git | Version control |
-| Docker (optional) | Devcontainer support |
+| Docker Desktop | Container runtime (enable WSL2 integration on Windows) |
+| VS Code + Dev Containers extension | Recommended IDE |
 
 ---
 
-## Quick Start
+## Devcontainer Setup (Recommended)
 
-### Linux / macOS / WSL
+The devcontainer provides a complete, reproducible environment including:
+
+- Python 3.12 with `uv` package manager
+- IBM DB2 CLI driver (`clidriver`) at `/opt/ibm/clidriver`
+- `snowflake-connector-python` for Snowflake connectivity
+- `ibm-db` for DB2 connectivity
+- `pytest`, `ruff`, and dev tooling
+- VS Code extensions: Python, Pylance, Ruff, SQLTools, Snowflake driver
+
+### Option A: VS Code (easiest)
+
+1. Open this repository in VS Code
+2. When prompted, click **"Reopen in Container"** (or run `Dev Containers: Reopen in Container` from the command palette)
+3. VS Code builds the image and attaches to the running container automatically
+
+### Option B: CLI
+
+```bash
+# Build the image
+docker build -f .devcontainer/Dockerfile -t productivity-dev .
+
+# Run interactively with the project mounted
+docker run -it --rm -v $(pwd):/workspace productivity-dev bash
+```
+
+### What the devcontainer does on creation
+
+1. Builds the Docker image (`.devcontainer/Dockerfile`)
+2. Installs all Python dependencies including Snowflake, DB2, and dev extras (`uv sync --frozen --all-extras`)
+3. Copies `.env.example` to `.env` if `.env` doesn't already exist
+
+### Docker image details
+
+The image is based on `python:3.12-slim` and includes:
+
+| Component | Details |
+|---|---|
+| Base image | `python:3.12-slim` (Debian) |
+| Architecture | x86_64 / AMD64 |
+| Python packages | `uv` (latest, via multi-stage copy from `ghcr.io/astral-sh/uv`) |
+| System libraries | `libssl-dev`, `libffi-dev`, `libxml2-dev`, `libxslt1-dev`, `libpam0g`, `build-essential`, `curl`, `unzip`, `git` |
+| IBM DB2 CLI driver | Downloaded from IBM public CDN, installed at `/opt/ibm/clidriver` |
+| Environment variables | `IBM_DB_HOME=/opt/ibm/clidriver`, `LD_LIBRARY_PATH=/opt/ibm/clidriver/lib` |
+
+---
+
+## Local Setup (Without Docker)
+
+If you prefer to develop without Docker, you will need to install the IBM DB2 CLI driver manually.
+
+### Quick Start
+
+#### Linux / macOS / WSL
 
 ```bash
 bash bootstrap.sh
 ```
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 
 ```powershell
 .\bootstrap.ps1
@@ -32,28 +85,37 @@ bash bootstrap.sh
 The bootstrap script will:
 1. Install `uv` if not already present
 2. Create a virtual environment and install all dependencies from `uv.lock`
-3. Copy `.env.example` → `.env` (if `.env` doesn't exist yet)
+3. Copy `.env.example` to `.env` (if `.env` doesn't exist yet)
 4. Validate the DB2 driver installation
 5. Run a smoke test to confirm the environment works
 
----
-
-## Manual Setup
-
-If you prefer to run steps individually:
+### Manual Setup
 
 ```bash
 # 1. Install uv (Linux/macOS)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 2. Install dependencies (exact versions from lockfile)
-uv sync --frozen
+# 2. Install the IBM DB2 CLI driver
+curl -fsSL \
+  "https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz" \
+  -o /tmp/clidriver.tar.gz
+sudo mkdir -p /opt/ibm
+sudo tar xzf /tmp/clidriver.tar.gz -C /opt/ibm
+rm /tmp/clidriver.tar.gz
 
-# 3. Set up environment variables
+# 3. Set environment variables (add to your shell profile)
+export IBM_DB_HOME=/opt/ibm/clidriver
+export LD_LIBRARY_PATH=$IBM_DB_HOME/lib:$LD_LIBRARY_PATH
+export PATH=$IBM_DB_HOME/bin:$PATH
+
+# 4. Install all Python dependencies
+uv sync --frozen --all-extras
+
+# 5. Set up environment variables
 cp .env.example .env
 # Edit .env with your actual credentials
 
-# 4. Run a script
+# 6. Run a script
 uv run python scripts/smoke_test.py
 ```
 
@@ -79,32 +141,20 @@ uv sync --frozen
 
 > **Never** use `pip install` directly — use `uv add` so the lockfile stays up to date.
 
----
-
-## Optional Extras
+### Optional Extras
 
 The project defines optional extras for database connectors:
 
 ```bash
-# Install Snowflake connector
+# Install Snowflake connector only
 uv sync --extra snowflake
 
-# Install IBM DB2 driver
+# Install IBM DB2 driver only
 uv sync --extra db2
 
-# Install all extras
+# Install all extras (recommended)
 uv sync --all-extras
 ```
-
----
-
-## Devcontainer (VS Code / GitHub Codespaces)
-
-Open the repository in VS Code and click **"Reopen in Container"** when prompted. The devcontainer will:
-
-- Build the Docker image with `uv` pre-installed
-- Run `uv sync --frozen` automatically on creation
-- Copy `.env.example` → `.env` if needed
 
 ---
 
@@ -139,6 +189,6 @@ cp .env.example .env
 
 | Phase | Action |
 |---|---|
-| Week 1 | Clone repo, run `bootstrap.sh`, fill in `.env` |
-| Week 2–3 | Explore scripts, run smoke tests, add new dependencies with `uv add` |
-| Month 1–2 | Use devcontainer for a fully reproducible environment |
+| Week 1 | Clone repo, run devcontainer or `bootstrap.sh`, fill in `.env` |
+| Week 2-3 | Explore scripts, run smoke tests, add new dependencies with `uv add` |
+| Month 1-2 | Develop against Snowflake and DB2 in the devcontainer |

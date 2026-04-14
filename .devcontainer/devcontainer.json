@@ -1,5 +1,5 @@
 {
-  "name": "Python Productivity Dev Environment",
+  "name": "Snowflake & DB2 Dev Environment",
   "build": {
     "dockerfile": "Dockerfile",
     "context": ".."
@@ -13,7 +13,10 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "charliermarsh.ruff",
-        "tamasfe.even-better-toml"
+        "tamasfe.even-better-toml",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-mysql",
+        "koszti.snowflake-driver-for-sqltools"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
@@ -24,6 +27,10 @@
       }
     }
   },
-  "postCreateCommand": "uv sync --frozen && [ -f .env ] || cp .env.example .env",
+  "containerEnv": {
+    "IBM_DB_HOME": "/opt/ibm/clidriver",
+    "LD_LIBRARY_PATH": "/opt/ibm/clidriver/lib"
+  },
+  "postCreateCommand": "uv sync --frozen --all-extras && [ -f .env ] || cp .env.example .env",
   "remoteUser": "root"
 }

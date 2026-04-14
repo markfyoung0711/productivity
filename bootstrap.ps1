@@ -7,6 +7,10 @@ $ErrorActionPreference = "Stop"
 Write-Host ">>> Installing uv if not present..."
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
     irm https://astral.sh/uv/install.ps1 | iex
+    $uvBin = Join-Path $env:USERPROFILE ".local\bin"
+    if (Test-Path $uvBin) {
+        $env:Path = "$uvBin;$env:Path"
+    }
 }
 
 Write-Host ">>> uv $(uv --version)"

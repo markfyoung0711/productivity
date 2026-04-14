@@ -19,7 +19,7 @@
         "koszti.snowflake-driver-for-sqltools"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
         "editor.formatOnSave": true,
         "[python]": {
           "editor.defaultFormatter": "charliermarsh.ruff"
@@ -32,7 +32,7 @@
         "ru.adelf.idea.dotenv"
       ],
       "settings": {
-        "python.interpreter.path": "/workspace/.venv/bin/python"
+        "python.interpreter.path": "/opt/venv/bin/python"
       }
     }
   },

@@ -20,7 +20,7 @@ The project includes a devcontainer with all dependencies (Python 3.12, DB2 CLI 
 
 ```bash
 # Build the image
-docker build -f .devcontainer/Dockerfile -t productivity-dev .
+./scripts/build-docker.sh
 
 # Run interactively with the project mounted
 docker run -it --rm -v $(pwd):/workspace productivity-dev bash

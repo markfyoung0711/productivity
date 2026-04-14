@@ -218,6 +218,21 @@ cp .env.example .env
 
 ---
 
+## Continuous Integration
+
+The project uses GitHub Actions (`.github/workflows/ci.yml`) to run on every push to `main`/`master` and on every pull request.
+
+| Step | Tool | Details |
+|---|---|---|
+| Checkout | `actions/checkout@v6` | Full history (`fetch-depth: 0`) for secret scanning |
+| Secret scan | `trufflesecurity/trufflehog@main` | Scans git history for verified secrets (`--only-verified`) |
+| Install uv | `astral-sh/setup-uv@v7` | Dependency manager with caching enabled |
+| Install Python | `uv python install` | Uses version from project config |
+| Install deps | `uv sync --extra dev` | Dev dependencies (pytest, ruff, etc.) |
+| Tests | `uv run pytest` | Runs the full test suite |
+
+---
+
 ## Onboarding Timeline
 
 | Phase | Action |

@@ -111,6 +111,14 @@ bash bootstrap.sh
 
 #### Windows (PowerShell)
 
+If script execution is disabled (the default on fresh Windows installs), enable it first:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+Then run the bootstrap:
+
 ```powershell
 .\bootstrap.ps1
 ```

@@ -1,4 +1,4 @@
-# bootstrap.ps1 — Windows onboarding script
+# bootstrap.ps1 - Windows onboarding script
 # Usage: .\bootstrap.ps1
 #Requires -Version 5.1
 Set-StrictMode -Version Latest
@@ -17,7 +17,7 @@ uv sync --frozen
 Write-Host ">>> Copying .env.example to .env if not present..."
 if (-not (Test-Path .env)) {
     Copy-Item .env.example .env
-    Write-Host "  .env created — fill in your credentials before continuing."
+    Write-Host "  .env created -- fill in your credentials before continuing."
 } else {
     Write-Host "  .env already exists, skipping."
 }

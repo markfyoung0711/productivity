@@ -54,6 +54,7 @@ docker run -it --rm -v $(pwd):/workspace productivity-dev bash
 The project works on native Windows without WSL for everything except DB2:
 
 ```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned  # one-time, if scripts are disabled
 .\bootstrap.ps1
 uv sync --extra dev --extra snowflake
 uv run pytest

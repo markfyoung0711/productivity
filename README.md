@@ -51,7 +51,7 @@ docker run -it --rm -v $(pwd):/workspace productivity-dev bash
 
 ### Windows (Native)
 
-The project works on native Windows without WSL for everything except DB2:
+The project works on native Windows without WSL, including DB2:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned  # one-time, if scripts are disabled
@@ -60,7 +60,7 @@ uv sync --extra dev --extra snowflake
 uv run pytest
 ```
 
-The `ibm-db` package requires the IBM DB2 CLI driver, which the project installs as a Linux shared library. On native Windows you would need the Windows DB2 driver instead. To avoid this, use the devcontainer via Docker Desktop — it runs Linux inside the container, so the DB2 driver works without any Windows DLLs.
+The bootstrap script automatically downloads and installs the IBM DB2 CLI driver for Windows to `C:\IBM\clidriver` if it is not already present.
 
 See [SETUP.md](SETUP.md) for full setup details, local (non-Docker) setup, dependency management, and environment variable configuration. SETUP.md also serves as the specification for regenerating this project's development environment and infrastructure.
 

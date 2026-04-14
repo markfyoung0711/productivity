@@ -26,11 +26,32 @@ if (-not (Test-Path .env)) {
     Write-Host "  .env already exists, skipping."
 }
 
+Write-Host ">>> Installing IBM DB2 CLI driver if not present..."
+$db2Home = "C:\IBM\clidriver"
+if (-not (Test-Path $db2Home)) {
+    $db2Url = "https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/ntx64_odbc_cli.zip"
+    $db2Zip = Join-Path $env:TEMP "ntx64_odbc_cli.zip"
+    Write-Host "  Downloading DB2 CLI driver..."
+    Invoke-WebRequest -Uri $db2Url -OutFile $db2Zip -UseBasicParsing
+    Write-Host "  Extracting to C:\IBM..."
+    New-Item -ItemType Directory -Path "C:\IBM" -Force | Out-Null
+    Expand-Archive -Path $db2Zip -DestinationPath "C:\IBM" -Force
+    Remove-Item $db2Zip
+    Write-Host "  DB2 CLI driver installed at $db2Home"
+} else {
+    Write-Host "  DB2 CLI driver already installed at $db2Home"
+}
+$env:IBM_DB_HOME = $db2Home
+$env:Path = "$db2Home\bin;$env:Path"
+
+Write-Host ">>> Installing ibm-db Python package..."
+uv sync --frozen --extra db2
+
 Write-Host ">>> Validating DB2 driver..."
 try {
     uv run python -c "import ibm_db; print('DB2 driver OK')"
 } catch {
-    Write-Warning "ibm_db not available. Install the db2 extra with: uv sync --extra db2"
+    Write-Warning "ibm_db import failed. The driver may require Visual C++ Redistributable."
 }
 
 Write-Host ">>> Running smoke test..."

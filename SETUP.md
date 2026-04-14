@@ -12,7 +12,8 @@ This guide walks you through setting up the development environment for this pro
 | `uv` | Dependency & environment management |
 | Git | Version control |
 | Docker Desktop | Container runtime (enable WSL2 integration on Windows) |
-| VS Code + Dev Containers extension | Recommended IDE |
+| VS Code + Dev Containers extension | IDE option (either VS Code or PyCharm) |
+| PyCharm Professional + Docker plugin | IDE option (either VS Code or PyCharm) |
 
 ---
 
@@ -26,14 +27,38 @@ The devcontainer provides a complete, reproducible environment including:
 - `ibm-db` for DB2 connectivity
 - `pytest`, `ruff`, and dev tooling
 - VS Code extensions: Python, Pylance, Ruff, SQLTools, Snowflake driver
+- PyCharm plugins: Database Tools, .env file support
 
-### Option A: VS Code (easiest)
+### Option A: VS Code
 
-1. Open this repository in VS Code
-2. When prompted, click **"Reopen in Container"** (or run `Dev Containers: Reopen in Container` from the command palette)
-3. VS Code builds the image and attaches to the running container automatically
+1. Install the **Dev Containers** extension
+2. Open this repository in VS Code
+3. When prompted, click **"Reopen in Container"** (or run `Dev Containers: Reopen in Container` from the command palette)
+4. VS Code builds the image and attaches to the running container automatically
 
-### Option B: CLI
+### Option B: PyCharm Professional
+
+PyCharm Professional can connect to the devcontainer in two ways:
+
+**Via JetBrains Gateway (devcontainer support):**
+
+1. Install **JetBrains Gateway**
+2. Select **Dev Containers** from the connection options
+3. Point it to this repository — Gateway reads `.devcontainer/devcontainer.json` and builds the image
+4. PyCharm opens inside the container with the correct interpreter and plugins
+
+**Via Docker remote interpreter:**
+
+1. Open this repository in PyCharm Professional
+2. Build the image first: `docker build -f .devcontainer/Dockerfile -t productivity-dev .`
+3. Go to **Settings > Project > Python Interpreter > Add Interpreter > Docker**
+4. Select the `productivity-dev:latest` image
+5. Set the interpreter path to `/workspace/.venv/bin/python`
+6. Under **Path Mappings**, map your local project root to `/workspace`
+
+> **Note:** Dev Container support requires PyCharm **Professional** edition. Community edition does not support Docker-based interpreters.
+
+### Option C: CLI
 
 ```bash
 # Build the image

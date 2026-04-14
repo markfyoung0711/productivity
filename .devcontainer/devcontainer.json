@@ -25,6 +25,15 @@
           "editor.defaultFormatter": "charliermarsh.ruff"
         }
       }
+    },
+    "jetbrains": {
+      "plugins": [
+        "com.intellij.database",
+        "ru.adelf.idea.dotenv"
+      ],
+      "settings": {
+        "python.interpreter.path": "/workspace/.venv/bin/python"
+      }
     }
   },
   "containerEnv": {

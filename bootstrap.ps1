@@ -26,32 +26,23 @@ if (-not (Test-Path .env)) {
     Write-Host "  .env already exists, skipping."
 }
 
-Write-Host ">>> Installing IBM DB2 CLI driver if not present..."
-$db2Home = "C:\IBM\clidriver"
-if (-not (Test-Path $db2Home)) {
-    $db2Url = "https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/ntx64_odbc_cli.zip"
-    $db2Zip = Join-Path $env:TEMP "ntx64_odbc_cli.zip"
-    Write-Host "  Downloading DB2 CLI driver..."
-    Invoke-WebRequest -Uri $db2Url -OutFile $db2Zip -UseBasicParsing
-    Write-Host "  Extracting to C:\IBM..."
-    New-Item -ItemType Directory -Path "C:\IBM" -Force | Out-Null
-    Expand-Archive -Path $db2Zip -DestinationPath "C:\IBM" -Force
-    Remove-Item $db2Zip
-    Write-Host "  DB2 CLI driver installed at $db2Home"
-} else {
-    Write-Host "  DB2 CLI driver already installed at $db2Home"
-}
-$env:IBM_DB_HOME = $db2Home
-$env:Path = "$db2Home\bin;$env:Path"
-
-Write-Host ">>> Installing ibm-db Python package..."
+Write-Host ">>> Installing ibm-db Python package (bundles DB2 CLI driver)..."
 uv sync --frozen --extra db2
+
+# The ibm-db wheel bundles clidriver inside site-packages. Python 3.8+ requires
+# the DLL directory to be on PATH for native extensions to load.
+$clidriver = uv run python -c "import importlib.util, os; spec = importlib.util.find_spec('ibm_db'); print(os.path.join(os.path.dirname(os.path.dirname(spec.origin)), 'clidriver', 'bin'))" 2>$null
+if ($clidriver -and (Test-Path $clidriver)) {
+    $env:Path = "$clidriver;$env:Path"
+    $env:IBM_DB_HOME = (Split-Path $clidriver)
+    Write-Host "  Using bundled clidriver at $(Split-Path $clidriver)"
+}
 
 Write-Host ">>> Validating DB2 driver..."
 try {
     uv run python -c "import ibm_db; print('DB2 driver OK')"
 } catch {
-    Write-Warning "ibm_db import failed. The driver may require Visual C++ Redistributable."
+    Write-Warning "ibm_db import failed. You may need the Visual C++ Redistributable: https://aka.ms/vs/17/release/vc_redist.x64.exe"
 }
 
 Write-Host ">>> Running smoke test..."

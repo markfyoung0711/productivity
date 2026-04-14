@@ -60,7 +60,7 @@ uv sync --extra dev --extra snowflake
 uv run pytest
 ```
 
-The bootstrap script automatically downloads and installs the IBM DB2 CLI driver for Windows to `C:\IBM\clidriver` if it is not already present.
+The bootstrap script installs the `ibm-db` package (which bundles the DB2 CLI driver) and configures the DLL search path automatically.
 
 See [SETUP.md](SETUP.md) for full setup details, local (non-Docker) setup, dependency management, and environment variable configuration. SETUP.md also serves as the specification for regenerating this project's development environment and infrastructure.
 

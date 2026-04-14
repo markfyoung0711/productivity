@@ -38,8 +38,13 @@ WORKDIR /workspace
 # Copy dependency files first (for layer caching)
 COPY pyproject.toml uv.lock ./
 
-# Install all Python dependencies including Snowflake, DB2, and dev extras
+# Install all Python dependencies including Snowflake, DB2, and dev extras.
+# Place the venv outside /workspace so it survives volume mounts at runtime.
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 RUN uv sync --frozen --all-extras
+
+# Put the venv on PATH so pytest, ruff, etc. are available directly
+ENV PATH="/opt/venv/bin:${PATH}"
 
 # Copy the rest of the project
 COPY . .

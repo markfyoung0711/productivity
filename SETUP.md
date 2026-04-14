@@ -53,7 +53,7 @@ PyCharm Professional can connect to the devcontainer in two ways:
 2. Build the image first: `docker build -f .devcontainer/Dockerfile -t productivity-dev .`
 3. Go to **Settings > Project > Python Interpreter > Add Interpreter > Docker**
 4. Select the `productivity-dev:latest` image
-5. Set the interpreter path to `/workspace/.venv/bin/python`
+5. Set the interpreter path to `/opt/venv/bin/python`
 6. Under **Path Mappings**, map your local project root to `/workspace`
 
 > **Note:** Dev Container support requires PyCharm **Professional** edition. Community edition does not support Docker-based interpreters.
@@ -85,7 +85,8 @@ The image is based on `python:3.12-slim` and includes:
 | Python packages | `uv` (latest, via multi-stage copy from `ghcr.io/astral-sh/uv`) |
 | System libraries | `libssl-dev`, `libffi-dev`, `libxml2-dev`, `libxslt1-dev`, `libpam0g`, `build-essential`, `curl`, `unzip`, `git` |
 | IBM DB2 CLI driver | Downloaded from IBM public CDN, installed at `/opt/ibm/clidriver` |
-| Environment variables | `IBM_DB_HOME=/opt/ibm/clidriver`, `LD_LIBRARY_PATH=/opt/ibm/clidriver/lib` |
+| Virtual environment | `/opt/venv` (outside `/workspace` so it survives volume mounts) |
+| Environment variables | `IBM_DB_HOME=/opt/ibm/clidriver`, `LD_LIBRARY_PATH=/opt/ibm/clidriver/lib`, `UV_PROJECT_ENVIRONMENT=/opt/venv` |
 
 ---
 
